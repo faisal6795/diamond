@@ -1,38 +1,62 @@
-.App {
-  text-align: center;
+:root {
+  --bg-color: #8fbcff;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.game-board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  width: min(90%, 35rem);
+  margin: 0 auto;
+  gap: 0.25rem;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.game-board button {
+  aspect-ratio: 1;
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+  background-color: var(--bg-color);
+  transition: all 0.3s ease;
+  transform: none;
 }
 
-.App-link {
-  color: #61dafb;
+.game-board button.flip {
+  transform: rotateY(180deg);
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.arrow {
+  aspect-ratio: 1;
+  background: url(assets/arrow.svg) no-repeat center;
+  background-size: 80%;
+}
+
+.diamond {
+  aspect-ratio: 1;
+  background: url(assets/diamond.svg) no-repeat center;
+  background-size: contain;
+}
+
+.left {
+  transform: rotate(180deg);
+}
+
+.right {
+  transform: rotate(0deg);
+}
+
+.up {
+  transform: rotate(270deg);
+}
+
+.down {
+  transform: rotate(90deg);
 }
