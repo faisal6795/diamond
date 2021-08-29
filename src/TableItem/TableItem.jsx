@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from 'prop-types';
+import { Arrow, Button, Diamond } from "./TableItem.styles";
 
 export default function TableItem({ row, col, isDiamond, getDirection, showDiamond, decrementScore }) {
 
@@ -7,19 +8,19 @@ export default function TableItem({ row, col, isDiamond, getDirection, showDiamo
 
     function btnClicked() {
         setPressed(true);
-        if (isDiamond(row, col))
+        if (isDiamond(row, col)) {
             showDiamond(row, col);
-        else {
+        } else {
             decrementScore();
             setTimeout(() => {
-                // setPressed(false);
+                setPressed(false);
             }, 4000);
         }
     }
 
     return isPressed ?
-        <div className={isDiamond(row, col) ? 'diamond' : 'arrow ' + getDirection(row, col)}></div> :
-        <button id={`button-${row}${col}`} onClick={btnClicked}></button>
+        isDiamond(row, col) ? <Diamond /> : <Arrow className={getDirection(row, col)} /> :
+        <Button id={`button-${row}${col}`} onClick={btnClicked}></Button>
 }
 
 TableItem.propType = {

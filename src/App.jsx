@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import TableItem from './TableItem';
-import './App.css';
+import TableItem from './TableItem/TableItem';
+import { Container, GameBoard, Score, ScoreBoard } from './App.styles';
 
 const SIZE = 8;
 
@@ -10,6 +10,9 @@ function App() {
 	const [isWon, setWon] = useState(false);
 	const [isGameOver, setGameOver] = useState(false);
 	const [diamondPositions, setDiamondPositions] = useState([]);
+	const descriptionText = 'Find all the diamonds behind the tiles in the lowest moves possible';
+	const winText = 'Congratulations! You have found all the diamonds.';
+	const gameOverText = 'Game Over!';
 
 	useEffect(() => {
 		const getDiamondPositions = () => {
@@ -50,21 +53,30 @@ function App() {
 	}
 
 	function getDirection(row, col) {
+		const nearestDiamond = getNearestDiamond(row, col);
+		if (nearestDiamond.row === row) {
+			return nearestDiamond.col > col ? 'right' : 'left';
+		} else if (nearestDiamond.col === col) {
+			return nearestDiamond.row > row ? 'down' : 'up';
+		} else if (nearestDiamond.row > row) {
+			return nearestDiamond.col > col ? 'bottom-right' : 'bottom-left';
+		} else if (nearestDiamond.row < row) {
+			return nearestDiamond.col > col ? 'top-right' : 'top-left';
+		}
+	}
+
+	function getNearestDiamond(row, col) {
 		let nearestDiamond,
 			minRows = SIZE,
 			minCols = SIZE;
 		diamondPositions.forEach(diamond => {
-			if ((diamond.row - row + diamond.col - col) < (minRows + minCols)) {
+			if ((Math.abs(diamond.row - row) + Math.abs(diamond.col - col)) < (minRows + minCols)) {
 				minRows = Math.abs(diamond.row - row);
 				minCols = Math.abs(diamond.col - col);
 				nearestDiamond = diamond;
 			}
 		});
-		if ((nearestDiamond.row - row) < (nearestDiamond.col - col) || nearestDiamond.row === row) {
-			return nearestDiamond.col > col ? 'right' : 'left';
-		} else {
-			return nearestDiamond.row > row ? 'down' : 'up';
-		}
+		return nearestDiamond;
 	}
 
 	function decrementScore() {
@@ -90,43 +102,39 @@ function App() {
 		setDiamondPositions(temp);
 		if (!remainingDiamonds()) {
 			setWon(true);
-			const prev = localStorage.getItem('highScore') || 0;
-			if (prev < score) localStorage.setItem('highScore', score);
+			if (getHighscore() < score) setHighscore(score);
 		}
+	}
+
+	function isWonOrLost() {
+		return isWon || isGameOver;
+	}
+
+	function getHighscore() {
+		return localStorage.getItem('highScore') || 0;
+	}
+
+	function setHighscore(score) {
+		localStorage.setItem('highScore', score)
 	}
 
 	function playAgain() {
 		window.location.reload();
 	}
 
-	function renderGame() {
-		return <>
-			<div className="score-board">
-				<p>Highscore: {localStorage.getItem('highScore') || 0}</p>
-				<p>Diamonds Left: {remainingDiamonds() || SIZE}</p>
-				<p>Your Score: {score}</p>
-			</div>
-			<div className="game-board">{getRows()}</div>
-		</>
-	}
-
-	function renderResult() {
-		return <div className='game-over'>
-			<div className="game-over-text">
-				{isGameOver ? 'Game Over' : 'Congratulations! You have found all the diamonds.'}
-			</div>
-			<p>Highscore: {localStorage.getItem('highScore') || 0}</p>
-			<p className="score">Your Score: {score}</p>
-			<button onClick={playAgain}>Play Again</button>
-		</div>
-	}
-
 	return (
-		<>
+		<Container>
 			<h1>Diamond Explorer</h1>
-			<p>Find all the diamonds behind the tiles in the lowest moves possible</p>
-			<div>{isGameOver || isWon ? renderResult() : renderGame()}</div>
-		</>
+			<p className={isWonOrLost() ? 'final-msg' : ''}>{isWon ? winText : isGameOver ? gameOverText : descriptionText}</p>
+			<ScoreBoard>
+				<Score className='score'><p>Your Score</p><strong>{score}</strong></Score>
+				{isWonOrLost() ?
+					<button className='restart-btn' onClick={playAgain}>Play Again</button> :
+					<p className='diamond-count'>Diamonds Left: {remainingDiamonds() || SIZE}</p>}
+				<Score className='highscore'><p>Highscore</p><strong>{getHighscore()}</strong></Score>
+			</ScoreBoard>
+			<GameBoard gameOver={isWonOrLost()}>{getRows()}</GameBoard>
+		</Container>
 	);
 }
 
