@@ -66,13 +66,11 @@ function App() {
 	}
 
 	function getNearestDiamond(row, col) {
-		let nearestDiamond,
-			minRows = SIZE,
-			minCols = SIZE;
+		let minimum = SIZE, nearestDiamond;
 		diamondPositions.forEach(diamond => {
-			if ((Math.abs(diamond.row - row) + Math.abs(diamond.col - col)) < (minRows + minCols)) {
-				minRows = Math.abs(diamond.row - row);
-				minCols = Math.abs(diamond.col - col);
+			const distance = Math.max(Math.abs(diamond.row - row), Math.abs(diamond.col - col));
+			if (distance < minimum) {
+				minimum = distance;
 				nearestDiamond = diamond;
 			}
 		});
