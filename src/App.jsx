@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import TableItem from './TableItem/TableItem';
 import { Container, GameBoard, Score, ScoreBoard } from './App.styles';
 
@@ -9,24 +9,22 @@ function App() {
 	const [score, setScore] = useState(SIZE * SIZE);
 	const [isWon, setWon] = useState(false);
 	const [isGameOver, setGameOver] = useState(false);
-	const [diamondPositions, setDiamondPositions] = useState([]);
+	const [currentActive, setCurrentActive] = useState([]);
+	const [diamondPositions, setDiamondPositions] = useState(getDiamondPositions());
 	const descriptionText = 'Find all the diamonds behind the tiles in the lowest moves possible';
 	const winText = 'Congratulations! You have found all the diamonds.';
 	const gameOverText = 'Game Over!';
 
-	useEffect(() => {
-		const getDiamondPositions = () => {
-			const positions = [];
-			while (positions.length < SIZE) {
-				const row = Math.floor(Math.random() * SIZE);
-				const col = Math.floor(Math.random() * SIZE);
-				if (positions.findIndex(item => item.row === row && item.col === col) === -1)
-					positions.push({ row, col, visible: false });
-			}
-			return positions;
+	function getDiamondPositions() {
+		const positions = [];
+		while (positions.length < SIZE) {
+			const row = Math.floor(Math.random() * SIZE);
+			const col = Math.floor(Math.random() * SIZE);
+			if (positions.findIndex(item => item.row === row && item.col === col) === -1)
+				positions.push({ row, col, visible: false });
 		}
-		setDiamondPositions(getDiamondPositions());
-	}, []);
+		return positions;
+	}
 
 	function getRows() {
 		let rows = [];
@@ -44,12 +42,26 @@ function App() {
 				row={rowIndex}
 				col={colIndex}
 				getDirection={(row, col) => getDirection(row, col)}
-				isDiamond={(row, col) => isDiamond(row, col)}
-				showDiamond={(row, col) => showDiamond(row, col)}
-				decrementScore={decrementScore}
+				isDiamond={isDiamond(rowIndex, colIndex)}
+				currentActive={currentActive}
+				handleBtnClicked={(row, col) => handleBtnClicked(row, col)}
 			/>);
 		}
 		return rowItems;
+	}
+
+	function handleBtnClicked(row, col) {
+		const temp = [...currentActive];
+		const id = `button-${row}${col}`;
+		temp.pop();
+		temp.push(id);
+		if (isDiamond(row, col)) {
+			showDiamond(row, col);
+			temp.unshift(id);
+		} else {
+			decrementScore();
+		}
+		setCurrentActive(temp);
 	}
 
 	function getDirection(row, col) {
@@ -71,6 +83,8 @@ function App() {
 			const distance = Math.max(Math.abs(diamond.row - row), Math.abs(diamond.col - col));
 			if (distance < minimum) {
 				minimum = distance;
+				nearestDiamond = diamond;
+			} else if (distance === minimum && (diamond.row === row || diamond.col === col)) {
 				nearestDiamond = diamond;
 			}
 		});
@@ -131,7 +145,7 @@ function App() {
 					<p className='diamond-count'>Diamonds Left: {remainingDiamonds() || SIZE}</p>}
 				<Score className='highscore'><p>Highscore</p><strong>{getHighscore()}</strong></Score>
 			</ScoreBoard>
-			<GameBoard gameOver={isWonOrLost()}>{getRows()}</GameBoard>
+			<GameBoard size={SIZE} gameOver={isWonOrLost()}>{getRows()}</GameBoard>
 		</Container>
 	);
 }

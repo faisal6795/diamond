@@ -21,7 +21,7 @@ export const Container = styled.div`
 
 export const GameBoard = styled.div`
     display: ${props => props.gameOver ? 'none' : 'grid'};
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(${props => props.size}, 1fr);
     width: 100%;
     margin: 0 auto;
     grid-gap: 0.25rem;
